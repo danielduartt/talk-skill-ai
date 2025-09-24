@@ -1,12 +1,35 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import InterviewSetup, { InterviewConfig } from "@/components/InterviewSetup";
+import InterviewSession from "@/components/InterviewSession";
+
+type AppState = 'setup' | 'interview' | 'results';
 
 const Index = () => {
+  const [appState, setAppState] = useState<AppState>('setup');
+  const [interviewConfig, setInterviewConfig] = useState<InterviewConfig | null>(null);
+
+  const handleStartInterview = (config: InterviewConfig) => {
+    setInterviewConfig(config);
+    setAppState('interview');
+  };
+
+  const handleBackToSetup = () => {
+    setAppState('setup');
+    setInterviewConfig(null);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen">
+      {appState === 'setup' && (
+        <InterviewSetup onStartInterview={handleStartInterview} />
+      )}
+      
+      {appState === 'interview' && interviewConfig && (
+        <InterviewSession 
+          config={interviewConfig} 
+          onBackToSetup={handleBackToSetup}
+        />
+      )}
     </div>
   );
 };
