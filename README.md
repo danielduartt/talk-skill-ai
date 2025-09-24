@@ -4,6 +4,32 @@
 
 **URL**: https://lovable.dev/projects/bfa7d836-2801-4443-bad6-9bb9cc02ba0f
 
+## Configuração da API
+
+Este projeto usa a API do Groq para avaliar as respostas da entrevista com IA.
+
+### Como configurar:
+
+1. Obtenha sua API key do Groq em: https://console.groq.com/keys
+2. Copie o arquivo `.env.example` para `.env`:
+   ```sh
+   cp .env.example .env
+   ```
+3. Edite o arquivo `.env` e substitua `your_groq_api_key_here` pela sua API key real
+4. Reinicie o servidor de desenvolvimento se estiver rodando
+
+### Como rodar o projeto:
+
+```sh
+# Instalar dependências
+bun install
+
+# Iniciar servidor de desenvolvimento
+bun run dev
+```
+
+O aplicativo estará disponível em: http://localhost:8080
+
 ## How can I edit this code?
 
 There are several ways of editing your application.

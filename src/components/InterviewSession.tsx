@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { InterviewConfig } from "./InterviewSetup";
 import { useToast } from "@/hooks/use-toast";
+import { groqService, type InterviewFeedback } from "@/services/groqService";
 
 interface InterviewSessionProps {
   config: InterviewConfig;
@@ -32,12 +33,7 @@ interface Question {
 interface Answer {
   questionId: number;
   text: string;
-  feedback?: {
-    score: number;
-    strengths: string[];
-    improvements: string[];
-    overall: string;
-  };
+  feedback?: InterviewFeedback;
 }
 
 const InterviewSession = ({ config, onBackToSetup }: InterviewSessionProps) => {
@@ -160,6 +156,8 @@ const InterviewSession = ({ config, onBackToSetup }: InterviewSessionProps) => {
   };
 
   const submitAnswer = async () => {
+    console.log('🚀 Tentando enviar resposta:', currentAnswer);
+    
     if (!currentAnswer.trim()) {
       toast({
         title: "Resposta vazia",
@@ -170,11 +168,36 @@ const InterviewSession = ({ config, onBackToSetup }: InterviewSessionProps) => {
     }
 
     setIsProcessing(true);
+    console.log('⏳ Processando resposta...');
 
-    // Simular processamento da API (em produção será uma chamada real)
-    setTimeout(() => {
-      const mockFeedback = {
-        score: Math.floor(Math.random() * 30) + 70, // 70-100
+    try {
+      // Usar o serviço do Groq para avaliar a resposta
+      const feedback = await groqService.evaluateAnswer(
+        currentQuestion.text,
+        currentAnswer,
+        config.area
+      );
+
+      const newAnswer: Answer = {
+        questionId: currentQuestion.id,
+        text: currentAnswer,
+        feedback
+      };
+
+      setAnswers(prev => [...prev, newAnswer]);
+      setShowFeedback(true);
+      
+      console.log('✅ Resposta processada com sucesso!');
+      toast({
+        title: "Resposta avaliada!",
+        description: "Feedback gerado com sucesso pela IA.",
+      });
+    } catch (error) {
+      console.error('❌ Erro ao avaliar resposta:', error);
+      
+      // Fallback para dados simulados em caso de erro
+      const mockFeedback: InterviewFeedback = {
+        score: Math.floor(Math.random() * 30) + 70,
         strengths: [
           "Resposta bem estruturada",
           "Exemplos concretos fornecidos",
@@ -184,7 +207,7 @@ const InterviewSession = ({ config, onBackToSetup }: InterviewSessionProps) => {
           "Poderia ser mais específico em alguns pontos",
           "Adicionar mais detalhes sobre resultados obtidos"
         ],
-        overall: "Boa resposta geral. Demonstra experiência relevante e comunicação clara."
+        overall: "Avaliação offline - Verifique sua configuração da API key do Groq."
       };
 
       const newAnswer: Answer = {
@@ -195,8 +218,15 @@ const InterviewSession = ({ config, onBackToSetup }: InterviewSessionProps) => {
 
       setAnswers(prev => [...prev, newAnswer]);
       setShowFeedback(true);
+      
+      toast({
+        title: "Modo offline",
+        description: "Configure sua API key do Groq para avaliação completa.",
+        variant: "destructive"
+      });
+    } finally {
       setIsProcessing(false);
-    }, 2000);
+    }
   };
 
   const nextQuestion = () => {
